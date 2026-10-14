@@ -16,8 +16,6 @@
     <p v-if="errorMessage" style="color: red; margin-top: 1rem; font-weight: bold;">
       {{ errorMessage }}
     </p>
-
-    <p v-if="errorMessage" style="color: red; margin-top: 1rem;">{{ errorMessage }}</p>
     <p style="margin-top: 1.5rem;">
       ¿No tienes cuenta? <router-link to="/register">Regístrate aquí</router-link>
     </p>

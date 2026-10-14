@@ -12,7 +12,6 @@
     <button @click="handleLogout" style="padding: 8px 12px; cursor: pointer;">
       Cerrar Sesión
     </button>
-    <button @click="handleLogout" style="padding: 8px 12px; cursor: pointer;">Cerrar Sesión</button>
   </div>
 </template>
 
