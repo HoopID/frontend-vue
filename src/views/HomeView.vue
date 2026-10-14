@@ -1,23 +1,20 @@
 <template>
   <div style="padding: 2rem; font-family: sans-serif;">
-    <h1>🏀 HoopID Frontend</h1>
-    <p>Plataforma de seguimiento e inteligencia deportiva para atletas.</p>
-    <p>Estado de conexión con Backend: <strong>{{ healthStatus }}</strong></p>
+    <h1>🏀 HoopID Dashboard</h1>
+    <p>Bienvenido al panel principal de tu perfil deportivo.</p>
+    <button @click="handleLogout" style="padding: 8px 12px; cursor: pointer;">Cerrar Sesión</button>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import apiClient from '../api/axios'
+import { useAuthStore } from '../stores/auth'
+import { useRouter } from 'vue-router'
 
-const healthStatus = ref('Conectando...')
+const authStore = useAuthStore()
+const router = useRouter()
 
-onMounted(async () => {
-  try {
-    const response = await apiClient.get('/health')
-    healthStatus.value = `Conectado (${response.data.status}) - Hora BD: ${response.data.db_time}`
-  } catch (error) {
-    healthStatus.value = 'Error al conectar con http://localhost:8000/api'
-  }
-})
+const handleLogout = () => {
+  authStore.logout()
+  router.push('/login')
+}
 </script>
