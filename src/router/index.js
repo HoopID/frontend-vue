@@ -9,6 +9,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/profile',
+    name: 'Profile',
+    component: () => import('../views/ProfileView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/login',
     name: 'Login',
     component: () => import('../views/LoginView.vue')
@@ -25,6 +31,7 @@ const router = createRouter({
   routes
 })
 
+// Guard moderno sin tercer parámetro `next`
 // Guard for protecting private routes
 router.beforeEach((to, from) => {
   const authStore = useAuthStore()
