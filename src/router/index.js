@@ -32,6 +32,7 @@ const router = createRouter({
 })
 
 // Guard moderno sin tercer parámetro `next`
+// Guard for protecting private routes
 router.beforeEach((to, from) => {
   const authStore = useAuthStore()
 
