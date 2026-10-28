@@ -7,6 +7,9 @@
       <router-link to="/profile" style="padding: 8px 12px; background: #e0e0e0; text-decoration: none; color: #333; border-radius: 4px;">
         Editar Mi Perfil
       </router-link>
+      <router-link to="/shooting-sessions" style="padding: 8px 12px; background: #007bff; text-decoration: none; color: white; border-radius: 4px;">
+        Sesiones de Tiro
+      </router-link>
     </div>
 
     <button @click="handleLogout" style="padding: 8px 12px; cursor: pointer;">

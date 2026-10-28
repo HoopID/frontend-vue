@@ -15,6 +15,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/shooting-sessions',
+    name: 'ShootingSessions',
+    component: () => import('../views/ShootingSessionsView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/login',
     name: 'Login',
     component: () => import('../views/LoginView.vue')
