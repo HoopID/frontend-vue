@@ -60,10 +60,18 @@
       <tbody>
         <tr v-for="item in sessions" :key="item.id" style="border-bottom: 1px solid #ddd;">
           <td style="padding: 8px;">{{ item.session_date }}</td>
-          <td style="padding: 8px;">{{ item.shot_type }}</td>
-          <td style="padding: 8px;">{{ item.shots_made }} / {{ item.shots_attempted }}</td>
+          <td style="padding: 8px;">{{ item.shot_zone ?? item.shot_type }}</td>
+          <td style="padding: 8px;">
+            {{ item.made ?? item.shots_made }} / {{ item.attempts ?? item.shots_attempted }}
+          </td>
           <td style="padding: 8px; font-weight: bold;">
-            {{ (item.shooting_percentage ?? ((item.shots_made / item.shots_attempted) * 100)).toFixed(1) }}%
+            {{ 
+              (item.shooting_percentage ?? 
+                ((item.attempts ?? item.shots_attempted) 
+                  ? (((item.made ?? item.shots_made) / (item.attempts ?? item.shots_attempted)) * 100) 
+                  : 0)
+              ).toFixed(1) 
+            }}%
           </td>
           <td style="padding: 8px; text-align: center;">
             <button 
@@ -88,8 +96,8 @@ const saving = ref(false)
 const errorMessage = ref('')
 
 const form = ref({
-  shots_made: 0,
-  shots_attempted: 0,
+  made: 0,
+  attempted: 0,
   session_date: new Date().toISOString().split('T')[0],
   shot_type: 'Triple'
 })
@@ -116,21 +124,25 @@ const handleCreate = async () => {
   saving.value = true
   errorMessage.value = ''
   try {
+    // Transformación del payload al formato que requiere el backend Express
     const payload = {
-      shots_made: Number(form.value.shots_made),
-      shots_attempted: Number(form.value.shots_attempted),
+      made: Number(form.value.shots_made),
+      attempts: Number(form.value.shots_attempted),
       session_date: form.value.session_date,
-      shot_type: form.value.shot_type
+      shot_zone: form.value.shot_type
     }
     
     await shootingService.createSession(payload)
+    
+    // Limpiar formulario tras guardar exitosamente
     form.value.shots_made = 0
     form.value.shots_attempted = 0
     
     await fetchSessions()
   } catch (error) {
-    const detail = error.response?.data?.detail
-    errorMessage.value = typeof detail === 'string' ? detail : 'Error al guardar la sesión.'
+    // Express suele devolver la propiedad "message" o "error" en la respuesta
+    const apiError = error.response?.data?.message || error.response?.data?.error || error.response?.data?.detail
+    errorMessage.value = typeof apiError === 'string' ? apiError : 'Error al guardar la sesión.'
   } finally {
     saving.value = false
   }
