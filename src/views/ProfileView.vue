@@ -1,33 +1,62 @@
 <template>
-  <div style="max-width: 600px; margin: 2rem auto; font-family: sans-serif; padding: 0 1rem;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-      <h2>🏀 Perfil Físico y Deportivo</h2>
-      <router-link to="/">Volver al Dashboard</router-link>
+  <main class="container" style="max-width: 640px">
+    <div class="page-header">
+      <div>
+        <h2>Perfil físico y deportivo</h2>
+        <p>Tus medidas y afiliación.</p>
+      </div>
     </div>
 
-    <div v-if="loading">Cargando perfil...</div>
+    <div v-if="loading" class="card empty">Cargando perfil...</div>
 
-    <form v-else @submit.prevent="handleSave">
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-        <div>
-          <label>Altura (cm):</label><br />
-          <input v-model.number="profile.height_cm" type="number" step="0.1" style="width: 100%; padding: 8px; margin-top: 4px;" />
+    <form v-else class="card" @submit.prevent="handleSave">
+      <div class="grid-2">
+        <div class="field">
+          <label>Nombre *</label>
+          <input v-model="profile.first_name" required type="text" />
         </div>
-        <div>
-          <label>Peso (kg):</label><br />
-          <input v-model.number="profile.weight_kg" type="number" step="0.1" style="width: 100%; padding: 8px; margin-top: 4px;" />
+        <div class="field">
+          <label>Apellido *</label>
+          <input v-model="profile.last_name" required type="text" />
         </div>
       </div>
 
-      <div style="margin-bottom: 1rem;">
-        <label>Envergadura (cm):</label><br />
-        <input v-model.number="profile.wingspan_cm" type="number" step="0.1" style="width: 100%; padding: 8px; margin-top: 4px;" />
+      <div class="grid-2">
+        <div class="field">
+          <label>Altura (cm) *</label>
+          <input v-model.number="profile.height_cm" required type="number" step="0.1" />
+        </div>
+        <div class="field">
+          <label>Peso (kg) *</label>
+          <input v-model.number="profile.weight_kg" required type="number" step="0.1" />
+        </div>
       </div>
 
-      <div style="margin-bottom: 1rem;">
-        <label>Posición principal:</label><br />
-        <select v-model="profile.position" style="width: 100%; padding: 8px; margin-top: 4px;">
-          <option value="">Selecciona una posición</option>
+      <div class="field">
+        <label>Envergadura (cm) *</label>
+        <input v-model.number="profile.wingspan_cm" required type="number" step="0.1" />
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label>Salto vertical (cm) *</label>
+          <input v-model.number="profile.vertical_leap_cm" required type="number" step="0.1" />
+        </div>
+        <div class="field">
+          <label>Mano hábil *</label>
+          <select v-model="profile.dominant_hand" required>
+            <option value="">Seleccioná</option>
+            <option value="Derecha">Derecha</option>
+            <option value="Izquierda">Izquierda</option>
+            <option value="Ambidiestro">Ambidiestro</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Posición principal *</label>
+        <select v-model="profile.position" required>
+          <option value="">Seleccioná una posición</option>
           <option value="Base">Base (Point Guard)</option>
           <option value="Escolta">Escolta (Shooting Guard)</option>
           <option value="Alero">Alero (Small Forward)</option>
@@ -36,26 +65,25 @@
         </select>
       </div>
 
-      <div style="margin-bottom: 1rem;">
-        <label>Club actual:</label><br />
-        <input v-model="profile.club" type="text" style="width: 100%; padding: 8px; margin-top: 4px;" />
+      <div class="grid-2">
+        <div class="field">
+          <label>Club actual</label>
+          <input v-model="profile.current_club" type="text" />
+        </div>
+        <div class="field">
+          <label>Selección (provincial / nacional)</label>
+          <input v-model="profile.selection_team" type="text" />
+        </div>
       </div>
 
-      <div style="margin-bottom: 1rem;">
-        <label>Liga / Competencia:</label><br />
-        <input v-model="profile.league" type="text" style="width: 100%; padding: 8px; margin-top: 4px;" />
-      </div>
+      <button type="submit" class="btn" :disabled="saving">
+        {{ saving ? 'Guardando...' : 'Guardar cambios' }}
+      </button>
 
-      <div style="margin-bottom: 1rem;">
-        <button type="submit" :disabled="saving" style="padding: 10px 20px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 4px;">
-          {{ saving ? 'Guardando...' : 'Guardar Cambios' }}
-        </button>
-      </div>
+      <p v-if="successMessage" class="alert alert-success">{{ successMessage }}</p>
+      <p v-if="errorMessage" class="alert alert-error">{{ errorMessage }}</p>
     </form>
-
-    <p v-if="successMessage" style="color: green; margin-top: 1rem; font-weight: bold;">{{ successMessage }}</p>
-    <p v-if="errorMessage" style="color: red; margin-top: 1rem; font-weight: bold;">{{ errorMessage }}</p>
-  </div>
+  </main>
 </template>
 
 <script setup>
@@ -66,9 +94,13 @@ const profile = ref({
   height_cm: null,
   weight_kg: null,
   wingspan_cm: null,
+  first_name: '',
+  last_name: '',
+  vertical_leap_cm: null,
+  dominant_hand: '',
   position: '',
-  club: '',
-  league: ''
+  current_club: '',
+  selection_team: ''
 })
 
 const loading = ref(true)
@@ -80,8 +112,9 @@ const fetchProfile = async () => {
   loading.value = true
   try {
     const data = await profileService.getProfile()
-    if (data) {
-      profile.value = { ...profile.value, ...data }
+    if (data?.profile) {
+      const clean = Object.fromEntries(Object.entries(data.profile).map(([k, v]) => [k, v ?? profile.value[k] ?? null]))
+      profile.value = { ...profile.value, ...clean }
     }
   } catch (error) {
     errorMessage.value = 'Error al cargar los datos del perfil.'
@@ -98,7 +131,8 @@ const handleSave = async () => {
     await profileService.updateProfile(profile.value)
     successMessage.value = '¡Perfil actualizado con éxito!'
   } catch (error) {
-    errorMessage.value = error.response?.data?.detail || 'Error al guardar el perfil.'
+    const data = error.response?.data
+    errorMessage.value = data?.message || data?.detail || 'Error al guardar el perfil.'
   } finally {
     saving.value = false
   }
