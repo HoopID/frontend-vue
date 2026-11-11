@@ -1,89 +1,78 @@
 <template>
-  <div style="max-width: 800px; margin: 2rem auto; font-family: sans-serif; padding: 0 1rem;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-      <h2>🎯 Sesiones de Tiro</h2>
-      <router-link to="/">Volver al Dashboard</router-link>
+  <main class="container">
+    <div class="page-header">
+      <div>
+        <h2>Sesiones de tiro</h2>
+        <p>Registrá tus entrenamientos y seguí tu efectividad.</p>
+      </div>
     </div>
 
-    <!-- Formulario de Registro -->
-    <form @submit.prevent="handleCreate" style="background: #f9f9f9; padding: 1rem; border-radius: 6px; margin-bottom: 2rem;">
-      <h3>Registrar Nueva Sesión</h3>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-        <div>
-          <label>Tiros Convertidos:</label><br />
-          <input v-model.number="form.shots_made" type="number" min="0" required style="width: 100%; padding: 8px; margin-top: 4px;" />
+    <form class="card" @submit.prevent="handleCreate">
+      <h3>Nueva sesión</h3>
+      <div class="grid-2">
+        <div class="field">
+          <label>Tiros convertidos</label>
+          <input v-model.number="form.shots_made" type="number" min="0" required />
         </div>
-        <div>
-          <label>Tiros Intentados:</label><br />
-          <input v-model.number="form.shots_attempted" type="number" min="1" required style="width: 100%; padding: 8px; margin-top: 4px;" />
+        <div class="field">
+          <label>Tiros intentados</label>
+          <input v-model.number="form.shots_attempted" type="number" min="1" required />
         </div>
       </div>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-        <div>
-          <label>Fecha de la Sesión:</label><br />
-          <input v-model="form.session_date" type="date" required style="width: 100%; padding: 8px; margin-top: 4px;" />
+      <div class="grid-2">
+        <div class="field">
+          <label>Fecha</label>
+          <input v-model="form.session_date" type="date" required />
         </div>
-        <div>
-          <label>Tipo / Zona de Tiro:</label><br />
-          <select v-model="form.shot_type" style="width: 100%; padding: 8px; margin-top: 4px;">
-            <option value="Triple">Tiro de 3 Puntos</option>
-            <option value="Media Distancia">Media Distancia</option>
-            <option value="Tiro Libre">Tiro Libre</option>
-            <option value="Catch & Shoot">Catch & Shoot</option>
+        <div class="field">
+          <label>Tipo / zona de tiro</label>
+          <select v-model="form.shot_type">
+            <option value="Triple">Triple</option>
+            <option value="Media Distancia">Media distancia</option>
+            <option value="Tiro Libre">Tiro libre</option>
           </select>
         </div>
       </div>
-
-      <button type="submit" :disabled="saving" style="padding: 8px 16px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 4px;">
-        {{ saving ? 'Guardando...' : 'Registrar Sesión' }}
+      <button type="submit" class="btn" :disabled="saving">
+        {{ saving ? 'Guardando...' : 'Registrar sesión' }}
       </button>
+      <p v-if="errorMessage" class="alert alert-error">{{ errorMessage }}</p>
     </form>
 
-    <p v-if="errorMessage" style="color: red; font-weight: bold;">{{ errorMessage }}</p>
-
-    <!-- Listado de Sesiones -->
-    <h3>Historial de Sesiones</h3>
-    <div v-if="loading">Cargando sesiones...</div>
-    <div v-else-if="sessions.length === 0">No has registrado sesiones de tiro aún.</div>
-    
-    <table v-else style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
-      <thead>
-        <tr style="background: #eee; text-align: left;">
-          <th style="padding: 8px;">Fecha</th>
-          <th style="padding: 8px;">Tipo</th>
-          <th style="padding: 8px;">Convertidos / Intentados</th>
-          <th style="padding: 8px;">Efectividad</th>
-          <th style="padding: 8px; text-align: center;">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="item in sessions" :key="item.id" style="border-bottom: 1px solid #ddd;">
-          <td style="padding: 8px;">{{ item.session_date }}</td>
-          <td style="padding: 8px;">{{ item.shot_zone ?? item.shot_type }}</td>
-          <td style="padding: 8px;">
-            {{ item.made ?? item.shots_made }} / {{ item.attempts ?? item.shots_attempted }}
-          </td>
-          <td style="padding: 8px; font-weight: bold;">
-            {{ 
-              (item.shooting_percentage ?? 
-                ((item.attempts ?? item.shots_attempted) 
-                  ? (((item.made ?? item.shots_made) / (item.attempts ?? item.shots_attempted)) * 100) 
-                  : 0)
-              ).toFixed(1) 
-            }}%
-          </td>
-          <td style="padding: 8px; text-align: center;">
-            <button 
-              @click="handleDelete(item.id)" 
-              style="background: #dc3545; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer;">
-              Eliminar
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    <div class="card">
+      <h3>Historial</h3>
+      <div v-if="loading" class="empty">Cargando sesiones...</div>
+      <div v-else-if="sessions.length === 0" class="empty">
+        🏀 Todavía no registraste sesiones de tiro.
+      </div>
+      <div v-else class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Zona</th>
+              <th>Convertidos</th>
+              <th>Efectividad</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in sessions" :key="item.id">
+              <td>{{ item.session_date }}</td>
+              <td>{{ item.shot_zone ?? item.shot_type }}</td>
+              <td>{{ made(item) }} / {{ attempts(item) }}</td>
+              <td>
+                <span class="pct" :class="pctClass(percentage(item))">{{ percentage(item).toFixed(1) }}%</span>
+              </td>
+              <td style="text-align: right">
+                <button class="btn btn-danger" @click="handleDelete(item.id)">Eliminar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
 </template>
 
 <script setup>
@@ -96,11 +85,16 @@ const saving = ref(false)
 const errorMessage = ref('')
 
 const form = ref({
-  made: 0,
-  attempted: 0,
+  shots_made: 0,
+  shots_attempted: 0,
   session_date: new Date().toISOString().split('T')[0],
   shot_type: 'Triple'
 })
+
+const made = (i) => Number(i.made ?? i.shots_made ?? 0)
+const attempts = (i) => Number(i.attempts ?? i.shots_attempted ?? 0)
+const percentage = (i) => (attempts(i) ? (made(i) / attempts(i)) * 100 : 0)
+const pctClass = (p) => (p >= 60 ? 'pct-high' : p >= 40 ? 'pct-mid' : 'pct-low')
 
 const fetchSessions = async () => {
   loading.value = true
@@ -124,24 +118,18 @@ const handleCreate = async () => {
   saving.value = true
   errorMessage.value = ''
   try {
-    // Transformación del payload al formato que requiere el backend Express
-    const payload = {
+    await shootingService.createSession({
       made: Number(form.value.shots_made),
       attempts: Number(form.value.shots_attempted),
       session_date: form.value.session_date,
       shot_zone: form.value.shot_type
-    }
-    
-    await shootingService.createSession(payload)
-    
-    // Limpiar formulario tras guardar exitosamente
+    })
     form.value.shots_made = 0
     form.value.shots_attempted = 0
-    
     await fetchSessions()
   } catch (error) {
-    // Express suele devolver la propiedad "message" o "error" en la respuesta
-    const apiError = error.response?.data?.message || error.response?.data?.error || error.response?.data?.detail
+    const data = error.response?.data
+    const apiError = data?.message || data?.error || data?.detail
     errorMessage.value = typeof apiError === 'string' ? apiError : 'Error al guardar la sesión.'
   } finally {
     saving.value = false
@@ -149,17 +137,14 @@ const handleCreate = async () => {
 }
 
 const handleDelete = async (id) => {
-  if (!confirm('¿Estás seguro de que deseas eliminar esta sesión de tiro?')) return
-
+  if (!confirm('¿Eliminar esta sesión de tiro?')) return
   try {
     await shootingService.deleteSession(id)
-    sessions.value = sessions.value.filter(item => item.id !== id)
+    sessions.value = sessions.value.filter((item) => item.id !== id)
   } catch (error) {
     errorMessage.value = 'Error al eliminar la sesión.'
   }
 }
 
-onMounted(() => {
-  fetchSessions()
-})
+onMounted(fetchSessions)
 </script>

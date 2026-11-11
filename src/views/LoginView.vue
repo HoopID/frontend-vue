@@ -1,24 +1,28 @@
 <template>
-  <div style="max-width: 400px; margin: 3rem auto; font-family: sans-serif;">
-    <h2>🏀 Iniciar Sesión</h2>
-    <form @submit.prevent="handleLogin">
-      <div style="margin-bottom: 1rem;">
-        <label>Email:</label><br />
-        <input v-model="email" type="email" required style="width: 100%; padding: 8px;" />
-      </div>
-      <div style="margin-bottom: 1rem;">
-        <label>Contraseña:</label><br />
-        <input v-model="password" type="password" required style="width: 100%; padding: 8px;" />
-      </div>
-      <button type="submit" style="padding: 10px 15px; cursor: pointer;">Ingresar</button>
-    </form>
+  <div class="auth-wrap">
+    <div class="card auth-card">
+      <span class="brand">HOOP<span>ID</span></span>
+      <p class="auth-sub">Tu perfil de atleta, tus números.</p>
 
-    <p v-if="errorMessage" style="color: red; margin-top: 1rem; font-weight: bold;">
-      {{ errorMessage }}
-    </p>
-    <p style="margin-top: 1.5rem;">
-      ¿No tienes cuenta? <router-link to="/register">Regístrate aquí</router-link>
-    </p>
+      <form @submit.prevent="handleLogin">
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" v-model="email" type="email" required placeholder="tu@email.com" />
+        </div>
+        <div class="field">
+          <label for="password">Contraseña</label>
+          <input id="password" v-model="password" type="password" required placeholder="••••••••" />
+        </div>
+        <button type="submit" class="btn btn-block" :disabled="loading">
+          {{ loading ? 'Ingresando...' : 'Ingresar' }}
+        </button>
+      </form>
+
+      <p v-if="errorMessage" class="alert alert-error">{{ errorMessage }}</p>
+      <p class="auth-foot">
+        ¿No tenés cuenta? <router-link to="/register">Registrate</router-link>
+      </p>
+    </div>
   </div>
 </template>
 
@@ -30,16 +34,21 @@ import { useRouter } from 'vue-router'
 const email = ref('')
 const password = ref('')
 const errorMessage = ref('')
+const loading = ref(false)
 const authStore = useAuthStore()
 const router = useRouter()
 
 const handleLogin = async () => {
   errorMessage.value = ''
+  loading.value = true
   try {
     await authStore.login(email.value, password.value)
     router.push('/')
   } catch (error) {
-    errorMessage.value = error.response?.data?.detail || 'Error al iniciar sesión'
+    const data = error.response?.data
+    errorMessage.value = data?.message || data?.detail || 'Error al iniciar sesión'
+  } finally {
+    loading.value = false
   }
 }
 </script>

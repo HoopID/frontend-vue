@@ -1,29 +1,32 @@
 <template>
-  <div style="max-width: 400px; margin: 3rem auto; font-family: sans-serif;">
-    <h2>🏀 Crear Cuenta</h2>
-    <form @submit.prevent="handleRegister">
-      <div style="margin-bottom: 1rem;">
-        <label>Nombre:</label><br />
-        <input v-model="name" type="text" required style="width: 100%; padding: 8px;" />
-      </div>
-      <div style="margin-bottom: 1rem;">
-        <label>Correo:</label><br />
-        <input v-model="email" type="email" required style="width: 100%; padding: 8px;" />
-      </div>
-      <div style="margin-bottom: 1rem;">
-        <label>Contraseña:</label><br />
-        <input v-model="password" type="password" required style="width: 100%; padding: 8px;" />
-      </div>
-      <button type="submit" style="padding: 10px 15px; cursor: pointer;">Registrarse</button>
-    </form>
+  <div class="auth-wrap">
+    <div class="card auth-card">
+      <span class="brand">HOOP<span>ID</span></span>
+      <p class="auth-sub">Creá tu cuenta de atleta.</p>
 
-    <p v-if="errorMessage" style="color: red; margin-top: 1rem; font-weight: bold;">
-      {{ errorMessage }}
-    </p>
+      <form @submit.prevent="handleRegister">
+        <div class="field">
+          <label for="name">Nombre</label>
+          <input id="name" v-model="name" type="text" required placeholder="Tu nombre" />
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" v-model="email" type="email" required placeholder="tu@email.com" />
+        </div>
+        <div class="field">
+          <label for="password">Contraseña</label>
+          <input id="password" v-model="password" type="password" required placeholder="••••••••" />
+        </div>
+        <button type="submit" class="btn btn-block" :disabled="loading">
+          {{ loading ? 'Creando...' : 'Registrarme' }}
+        </button>
+      </form>
 
-    <p style="margin-top: 1.5rem;">
-      ¿Ya tienes cuenta? <router-link to="/login">Inicia sesión aquí</router-link>
-    </p>
+      <p v-if="errorMessage" class="alert alert-error">{{ errorMessage }}</p>
+      <p class="auth-foot">
+        ¿Ya tenés cuenta? <router-link to="/login">Iniciá sesión</router-link>
+      </p>
+    </div>
   </div>
 </template>
 
@@ -36,16 +39,21 @@ const name = ref('')
 const email = ref('')
 const password = ref('')
 const errorMessage = ref('')
+const loading = ref(false)
 const router = useRouter()
 
 const handleRegister = async () => {
   errorMessage.value = ''
+  loading.value = true
   try {
     await authService.register(name.value, email.value, password.value)
     router.push('/login')
   } catch (error) {
-    const detail = error.response?.data?.detail
+    const data = error.response?.data
+    const detail = data?.message || data?.detail
     errorMessage.value = typeof detail === 'string' ? detail : 'Error en los datos ingresados'
+  } finally {
+    loading.value = false
   }
 }
 </script>
