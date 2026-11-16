@@ -3,6 +3,8 @@
     <div class="navbar-inner">
       <router-link to="/" class="brand">HOOP<span>ID</span></router-link>
       <router-link to="/" class="nav-link">Inicio</router-link>
+      <router-link to="/shooting-stats" class="nav-link">Tiros</router-link>
+      <router-link to="/matches" class="nav-link">Partidos</router-link>
       <button class="btn btn-ghost" @click="handleLogout">Salir</button>
     </div>
   </header>

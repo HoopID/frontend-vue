@@ -50,11 +50,36 @@
             <div class="stat-label">Sesiones</div>
           </div>
           <div class="card-stat">
-            <div class="stat-value">{{ bestZone }}</div>
+            <div class="stat-value stat-text">{{ bestZone }}</div>
             <div class="stat-label">Mejor zona</div>
           </div>
         </div>
       <span class="tile-hint">Ver por zona →</span>
+      </router-link>
+
+      <router-link to="/matches" class="tile tile-link">
+        <h3 class="tile-title">Partidos</h3>
+        <div class="big-pct">{{ avgPoints }}<small>pts</small></div>
+        <div class="stat-label">Promedio por partido</div>
+        <div class="card-stats">
+          <div class="card-stat">
+            <div class="stat-value">{{ matches.length }}</div>
+            <div class="stat-label">Jugados</div>
+          </div>
+          <div class="card-stat">
+            <div class="stat-value">{{ avgOf('rebounds') }}</div>
+            <div class="stat-label">Rebotes</div>
+          </div>
+          <div class="card-stat">
+            <div class="stat-value">{{ avgOf('assists') }}</div>
+            <div class="stat-label">Asistencias</div>
+          </div>
+          <div class="card-stat">
+            <div class="stat-value stat-text">{{ lastRival }}</div>
+            <div class="stat-label">Último rival</div>
+          </div>
+        </div>
+      <span class="tile-hint">Ver partidos →</span>
       </router-link>
     </section>
   </main>
@@ -65,10 +90,13 @@ import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import { profileService } from '../api/profileService'
 import { shootingService } from '../api/shootingService'
+import { matchService } from '../api/matchService'
+import { zoneLabel, zoneTotals } from '../constants/shootingZones'
 
 const authStore = useAuthStore()
 const profile = ref({})
 const sessions = ref([])
+const matches = ref([])
 
 const displayName = computed(() => [profile.value.first_name, profile.value.last_name].filter(Boolean).join(' ') || authStore.user?.email?.split('@')[0] || 'Atleta')
 const initial = computed(() => displayName.value.charAt(0).toUpperCase())
@@ -77,22 +105,23 @@ const totalAttempts = computed(() => sessions.value.reduce((s, x) => s + Number(
 const totalMade = computed(() => sessions.value.reduce((s, x) => s + Number(x.made ?? 0), 0))
 const accuracy = computed(() => (totalAttempts.value ? ((totalMade.value / totalAttempts.value) * 100).toFixed(1) : '–'))
 const bestZone = computed(() => {
-  const zones = {}
-  for (const x of sessions.value) {
-    const z = x.shot_zone ?? x.shot_type
-    zones[z] ??= { made: 0, att: 0 }
-    zones[z].made += Number(x.made ?? 0)
-    zones[z].att += Number(x.attempts ?? 0)
-  }
   let best = '–', bestPct = -1
-  for (const [z, v] of Object.entries(zones)) {
-    const pct = v.att ? v.made / v.att : 0
-    if (pct > bestPct) { best = z; bestPct = pct }
+  for (const [z, v] of Object.entries(zoneTotals(sessions.value))) {
+    const pct = v.attempts ? v.made / v.attempts : 0
+    if (pct > bestPct) { best = zoneLabel(z); bestPct = pct }
   }
   return best
 })
 
+const avgOf = (f) => (matches.value.length ? (matches.value.reduce((s, m) => s + Number(m[f] ?? 0), 0) / matches.value.length).toFixed(1) : '–')
+const avgPoints = computed(() => avgOf('points'))
+const lastRival = computed(() => matches.value[0]?.opponent ?? '–')
+
 onMounted(async () => {
+  try {
+    const res = await matchService.getMatches()
+    matches.value = Array.isArray(res.matches) ? res.matches : []
+  } catch (e) { /* sin partidos */ }
   try {
     const res = await profileService.getProfile()
     profile.value = res?.profile || {}
