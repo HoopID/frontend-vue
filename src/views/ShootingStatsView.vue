@@ -12,18 +12,13 @@
     </div>
 
     <div class="stats-layout">
-    <aside class="zone-tabs" role="tablist">
-      <button
-        v-for="z in ['', ...zones]"
-        :key="z"
-        type="button"
-        class="zone-tab"
-        :class="{ active: selectedZone === z }"
-        @click="selectedZone = z"
-      >
-        <span class="zone-icon">{{ icons[z] || '🏀' }}</span>
-        <span>{{ z || 'Todas' }}</span>
-      </button>
+    <aside class="court-panel">
+      <CourtMap v-model="selectedZone" :stats="allTotals" />
+      <p class="court-hint">
+        {{ selectedZone ? zoneLabel(selectedZone) : 'Todas las zonas' }} ·
+        tocá una zona para filtrar
+      </p>
+      <button v-if="selectedZone" type="button" class="btn btn-ghost" @click="selectedZone = ''">Ver todas</button>
     </aside>
 
       <section class="stats-content">
@@ -31,7 +26,7 @@
     <div v-else class="card">
       <div class="tile-stats">
         <div class="big-pct">{{ accuracy }}<small>%</small></div>
-        <div class="stat-label">Efectividad {{ selectedZone ? '· ' + selectedZone : 'total' }}</div>
+        <div class="stat-label">Efectividad {{ selectedZone ? '· ' + zoneLabel(selectedZone) : 'total' }}</div>
       </div>
       <div class="stats" style="margin-top: 1.5rem">
         <div class="stat">
@@ -43,15 +38,15 @@
           <div class="stat-label">Intentados</div>
         </div>
         <div class="stat">
-          <div class="stat-value">{{ filtered.length }}</div>
+          <div class="stat-value">{{ sessionCount }}</div>
           <div class="stat-label">Sesiones</div>
         </div>
         <div v-if="!selectedZone" class="stat">
-          <div class="stat-value">{{ bestZone.name }}</div>
+          <div class="stat-value">{{ bestZone.name === '–' ? '–' : zoneLabel(bestZone.name) }}</div>
           <div class="stat-label">Mejor zona{{ bestZone.pct !== null ? ' · ' + bestZone.pct.toFixed(1) + '%' : '' }}</div>
         </div>
       </div>
-      <p v-if="filtered.length === 0" class="empty">No hay sesiones en esta zona todavía.</p>
+      <p v-if="rows.length === 0" class="empty">No hay sesiones en esta zona todavía.</p>
     </div>
 
     <div v-if="!loading && best" class="card best-session">
@@ -63,11 +58,11 @@
         </div>
         <div>
           <div class="stat-label">Zona</div>
-          <div class="best-val">{{ zoneOf(best) }}</div>
+          <div class="best-val">{{ best.zoneText }}</div>
         </div>
         <div>
           <div class="stat-label">Convertidos / Intentados</div>
-          <div class="best-val">{{ best.made ?? best.shots_made }} / {{ best.attempts ?? best.shots_attempted }}</div>
+          <div class="best-val">{{ best.made }} / {{ best.attempts }}</div>
         </div>
         <div>
           <div class="stat-label">Efectividad</div>
@@ -83,38 +78,60 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { shootingService } from '../api/shootingService'
+import CourtMap from '../components/CourtMap.vue'
+import { SHOT_ZONES, zoneLabel, zoneTotals } from '../constants/shootingZones'
 
 const sessions = ref([])
 const loading = ref(true)
 const selectedZone = ref('')
-const icons = { '': '📊', Triple: '🎯', 'Media Distancia': '📏', 'Tiro Libre': '🏁' }
 
-const zoneOf = (x) => x.shot_zone ?? x.shot_type
-const zones = computed(() => {
-  const base = ['Triple', 'Media Distancia', 'Tiro Libre']
-  const extra = sessions.value.map(zoneOf).filter((z) => z && !base.includes(z))
-  return [...base, ...new Set(extra)]
-})
-const filtered = computed(() =>
-  selectedZone.value ? sessions.value.filter((x) => zoneOf(x) === selectedZone.value) : sessions.value
-)
-const totalAttempts = computed(() => filtered.value.reduce((s, x) => s + Number(x.attempts ?? 0), 0))
-const totalMade = computed(() => filtered.value.reduce((s, x) => s + Number(x.made ?? 0), 0))
-const accuracy = computed(() => (totalAttempts.value ? ((totalMade.value / totalAttempts.value) * 100).toFixed(1) : '–'))
 const pctOf = (x) => (Number(x.attempts) ? (Number(x.made) / Number(x.attempts)) * 100 : 0)
+
+// Totales por zona de todas las sesiones (colorea la cancha)
+const allTotals = computed(() => zoneTotals(sessions.value))
+
+// Una fila por (sesión, zona), filtrada por la zona elegida
+const rows = computed(() =>
+  sessions.value.flatMap((s) =>
+    (s.zones ?? [])
+      .filter((z) => !selectedZone.value || z.zone === selectedZone.value)
+      .map((z) => ({ session_id: s.id, session_date: s.session_date, ...z }))
+  )
+)
+const totalAttempts = computed(() => rows.value.reduce((s, x) => s + Number(x.attempts), 0))
+const totalMade = computed(() => rows.value.reduce((s, x) => s + Number(x.made), 0))
+const accuracy = computed(() => (totalAttempts.value ? ((totalMade.value / totalAttempts.value) * 100).toFixed(1) : '–'))
+const sessionCount = computed(() => new Set(rows.value.map((x) => x.session_id)).size)
+
 const bestZone = computed(() => {
   let name = '–', pct = null
-  for (const z of zones.value) {
-    const list = sessions.value.filter((x) => zoneOf(x) === z)
-    const att = list.reduce((s, x) => s + Number(x.attempts ?? 0), 0)
-    const made = list.reduce((s, x) => s + Number(x.made ?? 0), 0)
-    if (att && (pct === null || made / att * 100 > pct)) { name = z; pct = (made / att) * 100 }
+  for (const z of SHOT_ZONES) {
+    const t = allTotals.value[z.key]
+    if (t && t.attempts && (pct === null || (t.made / t.attempts) * 100 > pct)) {
+      name = z.key
+      pct = (t.made / t.attempts) * 100
+    }
   }
   return { name, pct }
 })
+
+// Mejor sesión: con zona elegida, por esa zona; sin filtro, por el total de la sesión
 const best = computed(() => {
-  const list = filtered.value.filter((x) => Number(x.attempts) > 0)
-  return list.length ? list.reduce((a, b) => (pctOf(b) > pctOf(a) ? b : a)) : null
+  const bySession = new Map()
+  for (const r of rows.value) {
+    const cur = bySession.get(r.session_id) ?? { session_date: r.session_date, attempts: 0, made: 0, zones: [] }
+    cur.attempts += Number(r.attempts)
+    cur.made += Number(r.made)
+    cur.zones.push(r.zone)
+    bySession.set(r.session_id, cur)
+  }
+  const list = [...bySession.values()].filter((x) => x.attempts > 0)
+  if (!list.length) return null
+  const top = list.reduce((a, b) => (pctOf(b) > pctOf(a) ? b : a))
+  return {
+    ...top,
+    zoneText: top.zones.length === 1 ? zoneLabel(top.zones[0]) : `${top.zones.length} zonas`
+  }
 })
 
 onMounted(async () => {
