@@ -3,18 +3,18 @@
 
 > Documento **generado automáticamente** por la cátedra de Programación III (RepoSense + análisis de calidad + constancia). **No editar a mano**: se regenera en cada evaluación.
 > Rama evaluada: `main`. Análisis **heurístico** (regex + métricas): es una criba para orientar la revisión, **no una nota**.
-> Generado: 2026-11-16.
+> Generado: 2026-11-17.
 
 ## 1. Veredicto
 
 | Aspecto | Resultado |
 |---|---|
 | Tipo de proyecto | frontend |
-| Índice de calidad de servicios | **100/100** (mínimo 50) |
-| Criterios cumplidos | **14/14** |
+| Índice de calidad de servicios | **77/100** (mínimo 50) |
+| Criterios cumplidos | **13/14** |
 | Aprobado (semáforo) | **SI** |
-| Código (LOC) | 771 |
-| Archivos de código | 16 |
+| Código (LOC) | 1,391 |
+| Archivos de código | 20 |
 | Tests (archivos) | 0 |
 | Cobertura de líneas | no aplica (frontend sin herramienta de cobertura E2E) |
 | Capas detectadas | vistas, servicios, estado |
@@ -26,7 +26,7 @@
 
 | Autor | Commits | Código (LOC) | Tests (LOC) | Docs (LOC) | Días activos | % del código |
 |---|---:|---:|---:|---:|---:|---:|
-| Agustin Marthi | 7 | 1,125 | 0 | 8 | 5 | 100% |
+| Agustin Marthi | 8 | 1,832 | 0 | 8 | 6 | 100% |
 
 > _El LOC de autoría lo calcula RepoSense sobre el historial y puede diferir del LOC de código del análisis de calidad (que mira solo el estado de `main`)._
 
@@ -36,7 +36,7 @@
 
 | Alumno | Sesiones | Cumplimiento | Pausa | Recencia | IC | Nivel | Para subir de nivel |
 |---|--:|--:|--:|--:|--:|--|--|
-| Agustin Marthi | 11 | 41% | 14 d | 64% | **35** | No aprueba | Cumplimiento 41% (mín. 50%) |
+| Agustin Marthi | 12 | 44% | 14 d | 100% | **43** | No aprueba | Cumplimiento 44% (mín. 50%) |
 
 > Para aprobar el IC: **2 sesiones por semana** sostenidas, sin pausas mayores a **10 días** y con actividad en las **últimas 2 semanas**. Se excluyen merges, bots y al docente. Zona horaria UTC-3.
 
@@ -48,7 +48,7 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 
 - **Qué mide:** Un resumen numérico (0-100) que combina todas las señales y métricas del análisis, con topes duros por duplicación.
 - **Por qué importa:** Ordena y prioriza la revisión: un índice bajo indica varias señales que conviene mirar juntas.
-- **Tu resultado:** índice **100/100** _(mínimo 50)_
+- **Tu resultado:** índice **77/100** _(mínimo 50)_
 
 ### 2. Duplicación (DRY) (duplicacion) — OK
 
@@ -92,11 +92,15 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 - **Por qué importa:** Se pierde la ayuda del compilador justo donde los datos vienen de afuera (API, formularios).
 - **Tu resultado:** **0** uso(s) de `any` _(máximo 2)_
 
-### 9. Componente demasiado grande (BigC) — OK
+### 9. Componente demasiado grande (BigC) — A REVISAR
 
 - **Qué mide:** Componentes de UI muy extensos, que suelen mezclar render, estado y lógica.
 - **Por qué importa:** Son difíciles de leer, probar y reutilizar, y sus cambios tienen efectos inesperados.
-- **Tu resultado:** **0** componente(s) demasiado grande(s) _(máximo 1)_
+- **Tu resultado:** **3** componente(s) demasiado grande(s) _(máximo 1)_
+- **Para investigar la causa:**
+    - ¿El componente creció a medida que se agregaban requisitos, sin volver a dividirlo?
+    - ¿Mezcla responsabilidades distintas (mostrar, calcular, pedir datos)?
+    - ¿Se dividió por pantalla o por unidad de responsabilidad?
 
 ### 10. Baja cohesión (Coh) — OK
 
@@ -108,7 +112,7 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 
 - **Qué mide:** Complejidad ciclomática: cantidad de caminos posibles dentro de una función (condicionales, bucles, casos).
 - **Por qué importa:** Muchos caminos = difícil de seguir y de probar; suelen esconderse casos sin cubrir.
-- **Tu resultado:** **0** bloque(s) de complejidad alta _(máximo 5 por 1000 LOC (tenés 771 LOC))_
+- **Tu resultado:** **1** bloque(s) de complejidad alta _(máximo 5 por 1000 LOC (tenés 1391 LOC))_
 
 ### 12. Funciones/métodos largos o con muchos parámetros (Tam) — OK
 
@@ -126,11 +130,15 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 
 - **Qué mide:** Cantidad de vistas/componentes de pantalla del frontend.
 - **Por qué importa:** El frontend se mide por pantallas: pocas vistas sugiere poca cobertura de la interfaz pedida.
-- **Tu resultado:** **8** vista(s)/componente(s) _(mínimo 6)_
+- **Tu resultado:** **10** vista(s)/componente(s) _(mínimo 6)_
 
 ## 5. Observaciones y qué falta
 
-_Cumple **todos** los criterios del semáforo: no hay nada que arreglar para aprobar. El siguiente objetivo es sostenerlo y mejorar duplicación y diseño._
+**Aprobado con observaciones.** Estos criterios quedan en rojo (se permiten hasta **3** sin que sean compuertas críticas), así que no bloquean la aprobación pero conviene corregirlos:
+
+| Criterio | Resultado actual | Meta | Brecha | Cómo alcanzarlo |
+|---|---|---|---|---|
+| Componente demasiado grande (BigC) | **3** componente(s) demasiado grande(s) | máximo 1 | 2 componente(s) de más | Dividí el componente por responsabilidad en subcomponentes (render, estado, acceso a datos) y dejá el original sólo como orquestador. Meta: ≤1 componente grande. |
 
 > **Tests (informativo):** hoy tenés **0** archivo(s) de test; la meta es **5**, pero **no** es una compuerta del semáforo. Para acercarte, agregá tests de los flujos principales (servicios y endpoints) y corré la suite con coverage.
 
@@ -172,11 +180,20 @@ _Cumple **todos** los criterios del semáforo: no hay nada que arreglar para apr
 | 2026-11-11 | **Sí** | backend-express, frontend-vue | 4 / 1 |
 | 2026-11-13 | No | sin actividad | 0 / 0 |
 
-**Fuera de clase:** sin actividad registrada.
+**Fuera de clase:** 1 fecha(s) con actividad · 3 commits · 1 merges
+
+| Fecha | Repositorios | Commits / merges |
+|---|---|--:|
+| 2026-11-16 | backend-express, frontend-vue | 3 / 1 |
 
 ## 7. Anexo: dónde mirar
 
-_No hay criterios en rojo con archivos asociados._
+Archivos donde el análisis encontró cada señal en rojo (sin número de línea, a propósito):
+
+**Componente demasiado grande (BigC)** — 3 archivo(s):
+- `src/components/CourtMap.vue`
+- `src/views/MatchesView.vue`
+- `src/views/ShootingSessionsView.vue`
 
 ---
 _Informe generado por la cátedra. Los umbrales corresponden al perfil `exigente`. Ante dudas, revisá el archivo señalado y el criterio en `CRITERIOS-CALIDAD.md`._
