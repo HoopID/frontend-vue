@@ -187,15 +187,18 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 |---|---|--:|
 | 2026-11-16 | backend-express, frontend-vue | 3 / 1 |
 
-## 7. Anexo: dónde mirar
+## 7. Anexo: archivos donde se originan los problemas
 
-Archivos donde el análisis encontró cada señal en rojo (sin número de línea, a propósito):
+Se listan los archivos y líneas que el análisis marca para cada criterio en rojo. Para **duplicación** se muestran los archivos con más líneas repetidas; para **cobertura**, las unidades por debajo del umbral.
 
-**Componente demasiado grande (BigC)** — 3 archivo(s):
-- `src/components/CourtMap.vue`
-- `src/views/MatchesView.vue`
-- `src/views/ShootingSessionsView.vue`
+**Componente demasiado grande (BigC)** — 3 hallazgo(s) en 3 archivo(s):
+
+| Archivo | Línea(s) | Señal |
+|---|---|---|
+| `src/components/CourtMap.vue` | 1 | componente grande (188 líneas) |
+| `src/views/MatchesView.vue` | 1 | componente grande (265 líneas) |
+| `src/views/ShootingSessionsView.vue` | 1 | componente grande (208 líneas) |
 
 ---
-_Informe generado por la cátedra. Los umbrales corresponden al perfil `exigente`. Ante dudas, revisá el archivo señalado y el criterio en `CRITERIOS-CALIDAD.md`._
+_Informe generado por la cátedra. Los umbrales corresponden al perfil `exigente`. Ante dudas, revisá el archivo y la línea señalados y el criterio en `CRITERIOS-CALIDAD.md`._
 <!-- evaluacion:fin -->
