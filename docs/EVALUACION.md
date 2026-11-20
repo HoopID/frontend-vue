@@ -190,15 +190,24 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 
 ## 7. Anexo: archivos donde se originan los problemas
 
-Se listan los archivos y líneas que el análisis marca para cada criterio en rojo. Para **duplicación** se muestran los archivos con más líneas repetidas; para **cobertura**, las unidades por debajo del umbral.
+Se listan **todos** los archivos y líneas que el análisis marca para cada criterio en rojo. Para **duplicación** se muestran los archivos con líneas repetidas; para **cobertura**, las unidades por debajo del umbral.
+
+**Resumen por archivo** — archivos con más hallazgos:
+
+| Archivo | Hallazgos | Peso total | Señales |
+|---|---:|---:|---|
+| `src/components/CourtMap.vue` | 1 | 6 | big_component |
+| `src/views/HomeView.vue` | 1 | 5 | high_complexity |
+| `src/views/MatchesView.vue` | 1 | 6 | big_component |
+| `src/views/ShootingSessionsView.vue` | 1 | 6 | big_component |
 
 **Componente demasiado grande (BigC)** — 3 hallazgo(s) en 3 archivo(s):
 
-| Archivo | Línea(s) | Señal |
-|---|---|---|
-| `src/components/CourtMap.vue` | 1 | componente grande (188 líneas) |
-| `src/views/MatchesView.vue` | 1 | componente grande (265 líneas) |
-| `src/views/ShootingSessionsView.vue` | 1 | componente grande (208 líneas) |
+| Archivo | Línea(s) | Señal | Detalle |
+|---|---|---|---|
+| `src/components/CourtMap.vue` | 1 | big_component | componente grande (188 líneas) |
+| `src/views/MatchesView.vue` | 1 | big_component | componente grande (265 líneas) |
+| `src/views/ShootingSessionsView.vue` | 1 | big_component | componente grande (208 líneas) |
 
 ---
 _Informe generado por la cátedra. Los umbrales corresponden al perfil `exigente`. Ante dudas, revisá el archivo y la línea señalados y el criterio en `CRITERIOS-CALIDAD.md`._
